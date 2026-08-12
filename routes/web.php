@@ -50,6 +50,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
     // CRUD Product
+    Route::get('/new-products', [ProductController::class, 'newProducts']);
+    Route::get('/new-products/create', [ProductController::class, 'newCreate'])
+        ->name('products.new-products.create');
+    Route::get('/new-products/{product}/edit', [ProductController::class, 'newEdit'])
+        ->name('products.new-products.edit');
     // Destroy dipisahkan karena hanya Super Admin yang boleh hapus
     Route::resource('products', ProductController::class)
         ->except(['destroy']);

@@ -330,7 +330,7 @@ class ProductController extends Controller
             $fileName,
             [
                 'Content-Type' =>
-                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             ]
         );
     }
@@ -357,16 +357,16 @@ class ProductController extends Controller
             ],
             [
                 'file.required' =>
-                    'Silakan pilih file Excel terlebih dahulu.',
+                'Silakan pilih file Excel terlebih dahulu.',
 
                 'file.file' =>
-                    'File yang dipilih tidak valid.',
+                'File yang dipilih tidak valid.',
 
                 'file.mimes' =>
-                    'File harus berformat .xlsx atau .xls.',
+                'File harus berformat .xlsx atau .xls.',
 
                 'file.max' =>
-                    'Ukuran file Excel maksimal 5 MB.',
+                'Ukuran file Excel maksimal 5 MB.',
             ]
         );
 
@@ -442,7 +442,7 @@ class ProductController extends Controller
 
                 return back()->withErrors([
                     'file' =>
-                        'Format Excel tidak sesuai. Header wajib: Nama | Deskripsi | Harga | Stok. Status bersifat opsional.',
+                    'Format Excel tidak sesuai. Header wajib: Nama | Deskripsi | Harga | Stok. Status bersifat opsional.',
                 ]);
             }
 
@@ -468,7 +468,7 @@ class ProductController extends Controller
 
                 return back()->withErrors([
                     'file' =>
-                        'File Excel tidak memiliki data product.',
+                    'File Excel tidak memiliki data product.',
                 ]);
             }
 
@@ -633,9 +633,9 @@ class ProductController extends Controller
                     'name' => $name,
 
                     'description' =>
-                        $description !== ''
-                            ? $description
-                            : null,
+                    $description !== ''
+                        ? $description
+                        : null,
 
                     'price' => (float) $price,
 
@@ -688,7 +688,7 @@ class ProductController extends Controller
 
                 return back()->withErrors([
                     'file' =>
-                        'Tidak ada data product yang dapat di-import.',
+                    'Tidak ada data product yang dapat di-import.',
                 ]);
             }
 
@@ -723,14 +723,13 @@ class ProductController extends Controller
                     'success',
                     "{$totalImported} product berhasil di-import dari Excel."
                 );
-
         } catch (Throwable $exception) {
 
             report($exception);
 
             return back()->withErrors([
                 'file' =>
-                    'File Excel gagal dibaca. Pastikan file tidak rusak dan formatnya benar.',
+                'File Excel gagal dibaca. Pastikan file tidak rusak dan formatnya benar.',
             ]);
         }
     }
@@ -752,32 +751,32 @@ class ProductController extends Controller
     {
         $validated = $request->validate([
             'name' =>
-                'required|string|max:255',
+            'required|string|max:255',
 
             'description' =>
-                'nullable|string',
+            'nullable|string',
 
             'price' =>
-                'required|numeric|min:0',
+            'required|numeric|min:0',
 
             'stock' =>
-                'required|integer|min:0',
+            'required|integer|min:0',
 
             'status' =>
-                'required|in:aktif,tidak_aktif',
+            'required|in:aktif,tidak_aktif',
 
             'image' =>
-                'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         if ($request->hasFile('image')) {
             $validated['image'] =
                 $request
-                    ->file('image')
-                    ->store(
-                        'products',
-                        'public'
-                    );
+                ->file('image')
+                ->store(
+                    'products',
+                    'public'
+                );
         }
 
         Product::create($validated);
@@ -825,22 +824,22 @@ class ProductController extends Controller
     ) {
         $validated = $request->validate([
             'name' =>
-                'required|string|max:255',
+            'required|string|max:255',
 
             'description' =>
-                'nullable|string',
+            'nullable|string',
 
             'price' =>
-                'required|numeric|min:0',
+            'required|numeric|min:0',
 
             'stock' =>
-                'required|integer|min:0',
+            'required|integer|min:0',
 
             'status' =>
-                'required|in:aktif,tidak_aktif',
+            'required|in:aktif,tidak_aktif',
 
             'image' =>
-                'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         if ($request->hasFile('image')) {
@@ -854,11 +853,11 @@ class ProductController extends Controller
 
             $validated['image'] =
                 $request
-                    ->file('image')
-                    ->store(
-                        'products',
-                        'public'
-                    );
+                ->file('image')
+                ->store(
+                    'products',
+                    'public'
+                );
         }
 
         $product->update(
@@ -893,5 +892,138 @@ class ProductController extends Controller
                 'success',
                 'Product berhasil dihapus.'
             );
+    }
+
+    // buat halaman new product
+    public function newProducts(Request $request)
+    {
+        // Ambil nilai filter dari URL
+        $search = trim((string) $request->query('search', ''));
+        $minPrice = $request->query('min_price');
+        $maxPrice = $request->query('max_price');
+        $status = $request->query('status');
+
+        // Query awal
+        $query = Product::query();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Search Nama atau Deskripsi
+        |--------------------------------------------------------------------------
+        |
+        | Contoh:
+        | search = gaming
+        |
+        | Akan mencari product yang:
+        | - namanya mengandung "gaming"
+        | ATAU
+        | - deskripsinya mengandung "gaming"
+        |
+        */
+
+        if ($search !== '') {
+            $query->where(function ($query) use ($search) {
+                $query
+                    ->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Filter Harga Minimum
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $minPrice !== null &&
+            $minPrice !== '' &&
+            is_numeric($minPrice)
+        ) {
+            $query->where('price', '>=', (float) $minPrice);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Filter Harga Maksimum
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $maxPrice !== null &&
+            $maxPrice !== '' &&
+            is_numeric($maxPrice)
+        ) {
+            $query->where('price', '<=', (float) $maxPrice);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Filter Status
+        |--------------------------------------------------------------------------
+        |
+        | Aturan status yang digunakan:
+        |
+        | AKTIF:
+        | status = aktif
+        | DAN
+        | stock > 0
+        |
+        | TIDAK AKTIF:
+        | status = tidak_aktif
+        | ATAU
+        | stock = 0
+        |
+        */
+
+        if ($status === 'aktif') {
+            $query
+                ->where('status', 'aktif')
+                ->where('stock', '>', 0);
+        }
+
+        if ($status === 'tidak_aktif') {
+            $query->where(function ($query) {
+                $query
+                    ->where('status', 'tidak_aktif')
+                    ->orWhere('stock', '<=', 0);
+            });
+        }
+
+        // Ambil hasil setelah search + filter
+        $products = $query
+            ->latest()
+            ->get();
+
+        return Inertia::render('Products/NewIndex', [
+            'products' => $products,
+
+            // Kirim nilai filter kembali ke Vue
+            // supaya input tetap terisi setelah search
+            'filters' => [
+                'search' => $search,
+                'min_price' => $minPrice ?? '',
+                'max_price' => $maxPrice ?? '',
+                'status' => $status ?? '',
+            ],
+        ]);
+    }
+
+    public function newCreate()
+    {
+        return Inertia::render(
+            'Products/NewCreate'
+        );
+    }
+
+    // buat halaman new edit
+    public function newEdit(Product $product)
+    {
+        return Inertia::render(
+            'Products/NewEdit',
+            [
+                'product' => $product,
+            ]
+        );
     }
 }
