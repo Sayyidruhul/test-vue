@@ -1,36 +1,59 @@
 <script setup lang="ts">
-import { Link, router, useForm, usePage } from '@inertiajs/vue3'
-import { ref, watch } from 'vue'
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
+    Table,
+    TableBody,
+    TableHeader,
+} from '@/components/ui/table';
 
 interface Product {
-    id: number
-    name: string
-    description: string | null
-    price: string | number
-    stock: number
-    status: 'aktif' | 'tidak_aktif'
-    image: string | null
+    id: number;
+    name: string;
+    description: string | null;
+    price: string | number;
+    stock: number;
+    status: 'aktif' | 'tidak_aktif';
+    image: string | null;
 }
 
 interface Filters {
-    search: string
-    min_price: string | number
-    max_price: string | number
-    status: string
+    search: string;
+    min_price: string | number;
+    max_price: string | number;
+    status: string;
 }
 
 interface Props {
-    products: Product[]
-    filters: Filters
+    products: Product[];
+    filters: Filters;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
-const page = usePage()
+const page = usePage();
 
-const user = page.props.auth?.user as any
+const user = page.props.auth?.user as any;
 
-const isSuperAdmin = user?.role === 'super_admin'
+const isSuperAdmin = user?.role === 'super_admin';
 
 /*
 |--------------------------------------------------------------------------
@@ -38,23 +61,27 @@ const isSuperAdmin = user?.role === 'super_admin'
 |--------------------------------------------------------------------------
 */
 
-const search = ref(props.filters?.search ?? '')
+const search = ref(props.filters?.search ?? '');
 
 const minPrice = ref(
     props.filters?.min_price !== undefined &&
     props.filters?.min_price !== null
         ? String(props.filters.min_price)
         : '',
-)
+);
 
 const maxPrice = ref(
     props.filters?.max_price !== undefined &&
     props.filters?.max_price !== null
         ? String(props.filters.max_price)
         : '',
-)
+);
 
-const status = ref(props.filters?.status ?? '')
+const status = ref(
+    props.filters?.status && props.filters.status !== ''
+        ? props.filters.status
+        : 'semua',
+);
 
 /*
 |--------------------------------------------------------------------------
@@ -63,61 +90,48 @@ const status = ref(props.filters?.status ?? '')
 */
 
 const applyFilter = () => {
-    const params: Record<string, string> = {}
+    const params: Record<string, string> = {};
 
     if (search.value.trim() !== '') {
-        params.search = search.value.trim()
+        params.search = search.value.trim();
     }
 
     if (minPrice.value !== '') {
-        params.min_price = minPrice.value
+        params.min_price = minPrice.value;
     }
 
     if (maxPrice.value !== '') {
-        params.max_price = maxPrice.value
+        params.max_price = maxPrice.value;
     }
 
-    if (status.value !== '') {
-        params.status = status.value
+    if (status.value !== 'semua') {
+        params.status = status.value;
     }
 
-    router.get(
-        '/products',
-        params,
-        {
-            preserveState: true,
-            preserveScroll: true,
-            replace: true,
-        },
-    )
-}
+    router.get('/products', params, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
+};
 
 /*
 |--------------------------------------------------------------------------
 | Realtime Search
 |--------------------------------------------------------------------------
-|
-| Search, harga, dan status otomatis dijalankan.
-|
-| Delay 350ms digunakan supaya request tidak dikirim
-| setiap kali user menekan satu tombol keyboard.
-|
 */
 
-let filterTimer: ReturnType<typeof setTimeout> | null = null
+let filterTimer: ReturnType<typeof setTimeout> | null = null;
 
-watch(
-    [search, minPrice, maxPrice, status],
-    () => {
-        if (filterTimer) {
-            clearTimeout(filterTimer)
-        }
+watch([search, minPrice, maxPrice, status], () => {
+    if (filterTimer) {
+        clearTimeout(filterTimer);
+    }
 
-        filterTimer = setTimeout(() => {
-            applyFilter()
-        }, 350)
-    },
-)
+    filterTimer = setTimeout(() => {
+        applyFilter();
+    }, 350);
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -126,11 +140,11 @@ watch(
 */
 
 const resetFilter = () => {
-    search.value = ''
-    minPrice.value = ''
-    maxPrice.value = ''
-    status.value = ''
-}
+    search.value = '';
+    minPrice.value = '';
+    maxPrice.value = '';
+    status.value = 'semua';
+};
 
 /*
 |--------------------------------------------------------------------------
@@ -140,13 +154,13 @@ const resetFilter = () => {
 
 const deleteProduct = (id: number) => {
     if (!confirm('Apakah Anda yakin ingin menghapus product ini?')) {
-        return
+        return;
     }
 
-    const form = useForm({})
+    const form = useForm({});
 
-    form.delete(`/products/${id}`)
-}
+    form.delete(`/products/${id}`);
+};
 
 /*
 |--------------------------------------------------------------------------
@@ -155,8 +169,8 @@ const deleteProduct = (id: number) => {
 */
 
 const exportPdf = () => {
-    window.open('/products/export-pdf', '_blank')
-}
+    window.open('/products/export-pdf', '_blank');
+};
 
 /*
 |--------------------------------------------------------------------------
@@ -165,8 +179,8 @@ const exportPdf = () => {
 */
 
 const exportExcel = () => {
-    window.open('/products/export-excel', '_blank')
-}
+    window.open('/products/export-excel', '_blank');
+};
 
 /*
 |--------------------------------------------------------------------------
@@ -174,41 +188,41 @@ const exportExcel = () => {
 |--------------------------------------------------------------------------
 */
 
-const fileInput = ref<HTMLInputElement | null>(null)
+const fileInput = ref<HTMLInputElement | null>(null);
 
 const importForm = useForm<{
-    file: File | null
+    file: File | null;
 }>({
     file: null,
-})
+});
 
 const openImportFile = () => {
-    fileInput.value?.click()
-}
+    fileInput.value?.click();
+};
 
 const handleImportFile = (event: Event) => {
-    const target = event.target as HTMLInputElement
+    const target = event.target as HTMLInputElement;
 
     if (!target.files || target.files.length === 0) {
-        return
+        return;
     }
 
-    const file = target.files[0]
+    const file = target.files[0];
 
-    importForm.file = file
+    importForm.file = file;
 
     const confirmed = confirm(
         `Apakah Anda yakin ingin meng-import file "${file.name}"?`,
-    )
+    );
 
     if (!confirmed) {
-        importForm.reset()
+        importForm.reset();
 
         if (fileInput.value) {
-            fileInput.value.value = ''
+            fileInput.value.value = '';
         }
 
-        return
+        return;
     }
 
     importForm.post('/products/import-excel', {
@@ -216,40 +230,45 @@ const handleImportFile = (event: Event) => {
         preserveScroll: true,
 
         onSuccess: () => {
-            importForm.reset()
+            importForm.reset();
 
             if (fileInput.value) {
-                fileInput.value.value = ''
+                fileInput.value.value = '';
             }
         },
 
         onError: () => {
             if (fileInput.value) {
-                fileInput.value.value = ''
+                fileInput.value.value = '';
             }
         },
-    })
-}
+    });
+};
 </script>
 
 <template>
-    
-    <div class="min-h-screen bg-gray-100 p-8">
-        <div class="mx-auto max-w-7xl">
+    <Head title="Products" />
+
+    <div
+        class="min-h-full w-full flex-1 bg-background px-4 py-6 md:px-8 lg:px-10"
+    >
+        <div class="w-full space-y-6">
 
             <!-- Header -->
-            <div class="mb-6 flex items-start justify-between">
+            <div
+                class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
+            >
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-800">
+                    <h1 class="text-3xl font-bold tracking-tight">
                         Products
                     </h1>
 
-                    <p class="mt-1 text-gray-600">
+                    <p class="mt-1 text-muted-foreground">
                         Kelola data product
                     </p>
                 </div>
 
-                <div class="flex flex-wrap justify-end gap-2">
+                <div class="flex flex-wrap gap-2 sm:justify-end">
 
                     <!-- Input Import Excel -->
                     <input
@@ -261,176 +280,167 @@ const handleImportFile = (event: Event) => {
                     />
 
                     <!-- Import Excel -->
-                    <button
+                    <Button
                         v-if="isSuperAdmin"
                         type="button"
+                        variant="outline"
                         :disabled="importForm.processing"
                         @click="openImportFile"
-                        class="rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {{
                             importForm.processing
                                 ? 'Importing...'
                                 : 'Import Excel'
                         }}
-                    </button>
+                    </Button>
 
                     <!-- Export Excel -->
-                    <button
+                    <Button
                         v-if="isSuperAdmin"
                         type="button"
+                        variant="outline"
                         @click="exportExcel"
-                        class="rounded-lg bg-green-600 px-4 py-2 font-semibold text-white hover:bg-green-700"
                     >
                         Export Excel
-                    </button>
+                    </Button>
 
                     <!-- Export PDF -->
-                    <button
+                    <Button
                         v-if="isSuperAdmin"
                         type="button"
+                        variant="outline"
                         @click="exportPdf"
-                        class="rounded-lg bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-700"
                     >
                         Export PDF
-                    </button>
+                    </Button>
 
                     <!-- Tambah Product -->
-                    <Link
-                        href="/products/create"
-                        class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700"
-                    >
-                        + Tambah Product
-                    </Link>
+                    <Button as-child>
+                        <Link href="/products/create">
+                            + Tambah Product
+                        </Link>
+                    </Button>
 
                 </div>
             </div>
 
-            <!-- Search dan Filter -->
-            <div class="mb-6 rounded-lg bg-white p-5 shadow">
-
-                <div class="mb-4">
-                    <h2 class="text-lg font-semibold text-gray-800">
+            <!-- Search & Filter -->
+            <Card class="border-border/70 bg-card/95 shadow-sm">
+                <CardHeader>
+                    <CardTitle>
                         Search & Filter Product
-                    </h2>
+                    </CardTitle>
 
-                    <p class="mt-1 text-sm text-gray-500">
-                        Hasil akan otomatis berubah saat pencarian atau filter diubah.
-                    </p>
-                </div>
+                    <CardDescription>
+                        Hasil akan otomatis berubah saat pencarian atau filter
+                        diubah.
+                    </CardDescription>
+                </CardHeader>
 
-                <div
-                    class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4"
-                >
+                <CardContent class="space-y-4">
+                    <div
+                        class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4"
+                    >
 
-                    <!-- Search -->
-                    <div>
-                        <label
-                            for="search"
-                            class="mb-2 block text-sm font-medium text-gray-700"
-                        >
-                            Cari Product
-                        </label>
+                        <!-- Search -->
+                        <div>
+                            <Label for="search">
+                                Cari Product
+                            </Label>
 
-                        <input
-                            id="search"
-                            v-model="search"
-                            type="text"
-                            placeholder="Nama atau deskripsi..."
-                            autocomplete="off"
-                            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-800 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-                        />
+                            <Input
+                                id="search"
+                                v-model="search"
+                                class="mt-2"
+                                placeholder="Nama atau deskripsi..."
+                                autocomplete="off"
+                            />
 
-                        <p class="mt-1 text-xs text-gray-500">
-                            Cari berdasarkan nama atau deskripsi.
-                        </p>
+                            <p class="mt-1 text-xs text-muted-foreground">
+                                Cari berdasarkan nama atau deskripsi.
+                            </p>
+                        </div>
+
+                        <!-- Harga Minimum -->
+                        <div>
+                            <Label for="min_price">
+                                Harga Minimum
+                            </Label>
+
+                            <Input
+                                id="min_price"
+                                v-model="minPrice"
+                                class="mt-2"
+                                type="number"
+                                min="0"
+                                placeholder="Contoh: 50000"
+                            />
+                        </div>
+
+                        <!-- Harga Maksimum -->
+                        <div>
+                            <Label for="max_price">
+                                Harga Maksimum
+                            </Label>
+
+                            <Input
+                                id="max_price"
+                                v-model="maxPrice"
+                                class="mt-2"
+                                type="number"
+                                min="0"
+                                placeholder="Contoh: 500000"
+                            />
+                        </div>
+
+                        <!-- Status -->
+                        <div>
+                            <Label for="status">
+                                Status
+                            </Label>
+
+                            <Select v-model="status">
+                                <SelectTrigger
+                                    id="status"
+                                    class="mt-2 w-full"
+                                >
+                                    <SelectValue
+                                        placeholder="Semua Status"
+                                    />
+                                </SelectTrigger>
+
+                                <SelectContent>
+                                    <SelectItem value="semua">
+                                        Semua Status
+                                    </SelectItem>
+
+                                    <SelectItem value="aktif">
+                                        Aktif
+                                    </SelectItem>
+
+                                    <SelectItem value="tidak_aktif">
+                                        Tidak Aktif
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
                     </div>
 
-                    <!-- Harga Minimum -->
-                    <div>
-                        <label
-                            for="min_price"
-                            class="mb-2 block text-sm font-medium text-gray-700"
-                        >
-                            Harga Minimum
-                        </label>
-
-                        <input
-                            id="min_price"
-                            v-model="minPrice"
-                            type="number"
-                            min="0"
-                            placeholder="Contoh: 50000"
-                            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-800 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-                        />
-                    </div>
-
-                    <!-- Harga Maksimum -->
-                    <div>
-                        <label
-                            for="max_price"
-                            class="mb-2 block text-sm font-medium text-gray-700"
-                        >
-                            Harga Maksimum
-                        </label>
-
-                        <input
-                            id="max_price"
-                            v-model="maxPrice"
-                            type="number"
-                            min="0"
-                            placeholder="Contoh: 500000"
-                            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-800 placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-                        />
-                    </div>
-
-                    <!-- Status -->
-                    <div>
-                        <label
-                            for="status"
-                            class="mb-2 block text-sm font-medium text-gray-700"
-                        >
-                            Status
-                        </label>
-
-                        <select
-                            id="status"
-                            v-model="status"
-                            class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-                        >
-                            <option value="">
-                                Semua Status
-                            </option>
-
-                            <option value="aktif">
-                                Aktif
-                            </option>
-
-                            <option value="tidak_aktif">
-                                Tidak Aktif
-                            </option>
-                        </select>
-                    </div>
-
-                </div>
-
-                <!-- Reset -->
-                <div class="mt-4">
-                    <button
+                    <Button
                         type="button"
+                        variant="outline"
                         @click="resetFilter"
-                        class="rounded-lg border border-gray-300 bg-white px-5 py-2 font-semibold text-gray-700 hover:bg-gray-50"
                     >
                         Reset Filter
-                    </button>
-                </div>
-
-            </div>
+                    </Button>
+                </CardContent>
+            </Card>
 
             <!-- Error Import Excel -->
             <div
                 v-if="importForm.errors.file"
-                class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                class="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
             >
                 {{ importForm.errors.file }}
             </div>
@@ -438,7 +448,7 @@ const handleImportFile = (event: Event) => {
             <!-- Informasi Format Import -->
             <div
                 v-if="isSuperAdmin"
-                class="mb-6 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700"
+                class="rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary"
             >
                 Format Import Excel:
                 <strong>
@@ -451,7 +461,7 @@ const handleImportFile = (event: Event) => {
             </div>
 
             <!-- Jumlah Hasil -->
-            <div class="mb-3 text-sm text-gray-600">
+            <div class="text-sm text-muted-foreground">
                 Menampilkan
                 <strong>
                     {{ props.products.length }}
@@ -460,82 +470,81 @@ const handleImportFile = (event: Event) => {
             </div>
 
             <!-- Table -->
-            <div class="overflow-x-auto rounded-lg bg-white shadow">
-                <table class="w-full">
+            <Card
+                class="overflow-hidden border-border/70 bg-card/95 shadow-sm"
+            >
+                <Table>
 
-                    <!-- Header Table -->
-                    <thead class="bg-gray-50">
+                    <!-- Header -->
+                    <TableHeader>
                         <tr>
-
                             <th
-                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600"
+                                class="px-6 py-3 text-left text-sm font-semibold text-muted-foreground"
                             >
                                 No
                             </th>
 
                             <th
-                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600"
+                                class="px-6 py-3 text-left text-sm font-semibold text-muted-foreground"
                             >
                                 Foto
                             </th>
 
                             <th
-                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600"
+                                class="px-6 py-3 text-left text-sm font-semibold text-muted-foreground"
                             >
                                 Nama
                             </th>
 
                             <th
-                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600"
+                                class="px-6 py-3 text-left text-sm font-semibold text-muted-foreground"
                             >
                                 Deskripsi
                             </th>
 
                             <th
-                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600"
+                                class="px-6 py-3 text-left text-sm font-semibold text-muted-foreground"
                             >
                                 Harga
                             </th>
 
                             <th
-                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600"
+                                class="px-6 py-3 text-left text-sm font-semibold text-muted-foreground"
                             >
                                 Stok
                             </th>
 
                             <th
-                                class="px-6 py-3 text-center text-sm font-semibold text-gray-600"
+                                class="px-6 py-3 text-center text-sm font-semibold text-muted-foreground"
                             >
                                 Status
                             </th>
 
                             <th
-                                class="px-6 py-3 text-center text-sm font-semibold text-gray-600"
+                                class="px-6 py-3 text-center text-sm font-semibold text-muted-foreground"
                             >
                                 Aksi
                             </th>
-
                         </tr>
-                    </thead>
+                    </TableHeader>
 
-                    <!-- Isi Table -->
-                    <tbody class="divide-y divide-gray-200">
-
+                    <!-- Body -->
+                    <TableBody>
                         <tr
                             v-for="(product, index) in props.products"
                             :key="product.id"
-                            class="hover:bg-gray-50"
+                            class="transition-colors hover:bg-muted/40"
                         >
 
                             <!-- No -->
-                            <td class="px-6 py-4 text-gray-800">
+                            <td class="px-6 py-4 text-foreground">
                                 {{ index + 1 }}
                             </td>
 
                             <!-- Foto -->
                             <td class="px-6 py-4">
                                 <div
-                                    class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg bg-gray-100"
+                                    class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg bg-muted"
                                 >
                                     <img
                                         v-if="product.image"
@@ -546,7 +555,7 @@ const handleImportFile = (event: Event) => {
 
                                     <span
                                         v-else
-                                        class="text-xs text-gray-400"
+                                        class="text-xs text-muted-foreground"
                                     >
                                         No Image
                                     </span>
@@ -554,18 +563,18 @@ const handleImportFile = (event: Event) => {
                             </td>
 
                             <!-- Nama -->
-                            <td class="px-6 py-4 font-medium text-gray-800">
+                            <td class="px-6 py-4 font-medium text-foreground">
                                 {{ product.name }}
                             </td>
 
                             <!-- Deskripsi -->
-                            <td class="px-6 py-4 text-gray-600">
+                            <td class="px-6 py-4 text-muted-foreground">
                                 {{ product.description || '-' }}
                             </td>
 
                             <!-- Harga -->
                             <td
-                                class="whitespace-nowrap px-6 py-4 text-gray-800"
+                                class="whitespace-nowrap px-6 py-4 text-foreground"
                             >
                                 Rp
                                 {{
@@ -576,31 +585,30 @@ const handleImportFile = (event: Event) => {
                             </td>
 
                             <!-- Stok -->
-                            <td class="px-6 py-4 text-gray-800">
+                            <td class="px-6 py-4 text-foreground">
                                 {{ product.stock }}
                             </td>
 
                             <!-- Status -->
                             <td class="px-6 py-4 text-center">
 
-                                <!-- Tidak Aktif -->
-                                <span
+                                <Badge
                                     v-if="
                                         Number(product.stock) === 0 ||
                                         product.status === 'tidak_aktif'
                                     "
-                                    class="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700"
+                                    variant="destructive"
                                 >
                                     Tidak Aktif
-                                </span>
+                                </Badge>
 
-                                <!-- Aktif -->
-                                <span
+                                <Badge
                                     v-else
-                                    class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700"
+                                    variant="secondary"
+                                    class="bg-green-100 text-green-700 hover:bg-green-100"
                                 >
                                     Aktif
-                                </span>
+                                </Badge>
 
                             </td>
 
@@ -608,50 +616,58 @@ const handleImportFile = (event: Event) => {
                             <td class="px-6 py-4">
                                 <div class="flex justify-center gap-2">
 
-                                    <!-- Lihat -->
-                                    <Link
-                                        :href="`/products/${product.id}`"
-                                        class="rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700"
+                                    <Button
+                                        as-child
+                                        size="sm"
+                                        variant="outline"
                                     >
-                                        Lihat
-                                    </Link>
+                                        <Link
+                                            :href="`/products/${product.id}`"
+                                        >
+                                            Lihat
+                                        </Link>
+                                    </Button>
 
-                                    <!-- Edit -->
-                                    <Link
-                                        :href="`/products/${product.id}/edit`"
-                                        class="rounded bg-yellow-500 px-3 py-1 text-sm font-medium text-white hover:bg-yellow-600"
+                                    <Button
+                                        as-child
+                                        size="sm"
+                                        variant="outline"
                                     >
-                                        Edit
-                                    </Link>
+                                        <Link
+                                            :href="`/products/${product.id}/edit`"
+                                        >
+                                            Edit
+                                        </Link>
+                                    </Button>
 
-                                    <!-- Hapus -->
-                                    <button
+                                    <Button
                                         v-if="isSuperAdmin"
                                         type="button"
+                                        size="sm"
+                                        variant="destructive"
                                         @click="deleteProduct(product.id)"
-                                        class="rounded bg-red-600 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
                                     >
                                         Hapus
-                                    </button>
+                                    </Button>
 
                                 </div>
                             </td>
 
                         </tr>
 
-                        <!-- Tidak Ada Hasil -->
+                        <!-- Tidak Ada Data -->
                         <tr v-if="props.products.length === 0">
                             <td
                                 colspan="8"
-                                class="px-6 py-10 text-center text-gray-500"
+                                class="px-6 py-10 text-center text-muted-foreground"
                             >
                                 Product tidak ditemukan.
                             </td>
                         </tr>
 
-                    </tbody>
-                </table>
-            </div>
+                    </TableBody>
+                </Table>
+            </Card>
 
         </div>
     </div>
