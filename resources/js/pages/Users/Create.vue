@@ -1,173 +1,225 @@
 <script setup lang="ts">
-import { Link, useForm } from '@inertiajs/vue3'
+import { Head, Link, useForm } from '@inertiajs/vue3';
+
+import { Button } from '@/components/ui/button';
+
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+
+/*
+|--------------------------------------------------------------------------
+| Form
+|--------------------------------------------------------------------------
+*/
 
 const form = useForm({
     name: '',
     email: '',
     password: '',
     role: 'admin',
-})
+});
+
+/*
+|--------------------------------------------------------------------------
+| Submit
+|--------------------------------------------------------------------------
+*/
 
 const submit = () => {
-    form.post('/users')
-}
+    form.post('/users');
+};
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-100 p-8">
-        <div class="mx-auto max-w-2xl">
+    <Head title="Tambah User" />
+
+    <div
+        class="min-h-full w-full flex-1 bg-background px-4 py-6 md:px-8 lg:px-10"
+    >
+        <div class="w-full">
 
             <!-- Header -->
-            <div class="mb-6">
-                <Link
-                    href="/users"
-                    class="text-sm font-medium text-blue-600 hover:text-blue-800"
-                >
-                    ← Kembali ke Users
-                </Link>
+            <h1 class="text-3xl font-bold tracking-tight">
+                Tambah User
+            </h1>
 
-                <h1 class="mt-4 text-3xl font-bold text-gray-800">
-                    Tambah User
-                </h1>
+            <p class="mt-1 mb-6 text-muted-foreground">
+                Tambahkan user baru ke sistem
+            </p>
 
-                <p class="mt-1 text-gray-600">
-                    Tambahkan user baru ke sistem
-                </p>
-            </div>
+            <!-- Card -->
+            <Card
+                class="w-full border-border/70 bg-card/95 shadow-sm"
+            >
+                <CardHeader>
+                    <CardTitle>
+                        Informasi User
+                    </CardTitle>
 
-            <!-- Form -->
-            <div class="rounded-lg bg-white p-6 shadow">
+                    <CardDescription>
+                        Lengkapi data user di bawah ini.
+                    </CardDescription>
+                </CardHeader>
 
-                <!-- Nama -->
-                <div class="mb-5">
-                    <label
-                        for="name"
-                        class="mb-2 block text-sm font-semibold text-gray-700"
+                <CardContent>
+                    <form
+                        class="space-y-5"
+                        @submit.prevent="submit"
                     >
-                        Nama
-                    </label>
 
-                    <input
-                        id="name"
-                        v-model="form.name"
-                        type="text"
-                        placeholder="Masukkan nama"
-                        class="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                    />
+                        <!-- Nama -->
+                        <div class="space-y-2">
+                            <Label for="name">
+                                Nama
+                            </Label>
 
-                    <p
-                        v-if="form.errors.name"
-                        class="mt-1 text-sm text-red-600"
-                    >
-                        {{ form.errors.name }}
-                    </p>
-                </div>
+                            <Input
+                                id="name"
+                                v-model="form.name"
+                                type="text"
+                                placeholder="Masukkan nama"
+                                :aria-invalid="!!form.errors.name"
+                            />
 
-                <!-- Email -->
-                <div class="mb-5">
-                    <label
-                        for="email"
-                        class="mb-2 block text-sm font-semibold text-gray-700"
-                    >
-                        Email
-                    </label>
+                            <p
+                                v-if="form.errors.name"
+                                class="text-sm text-destructive"
+                            >
+                                {{ form.errors.name }}
+                            </p>
+                        </div>
 
-                    <input
-                        id="email"
-                        v-model="form.email"
-                        type="email"
-                        placeholder="Masukkan email"
-                        class="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                    />
+                        <!-- Email -->
+                        <div class="space-y-2">
+                            <Label for="email">
+                                Email
+                            </Label>
 
-                    <p
-                        v-if="form.errors.email"
-                        class="mt-1 text-sm text-red-600"
-                    >
-                        {{ form.errors.email }}
-                    </p>
-                </div>
+                            <Input
+                                id="email"
+                                v-model="form.email"
+                                type="email"
+                                placeholder="Masukkan email"
+                                :aria-invalid="!!form.errors.email"
+                            />
 
-                <!-- Password -->
-                <div class="mb-5">
-                    <label
-                        for="password"
-                        class="mb-2 block text-sm font-semibold text-gray-700"
-                    >
-                        Password
-                    </label>
+                            <p
+                                v-if="form.errors.email"
+                                class="text-sm text-destructive"
+                            >
+                                {{ form.errors.email }}
+                            </p>
+                        </div>
 
-                    <input
-                        id="password"
-                        v-model="form.password"
-                        type="password"
-                        placeholder="Minimal 8 karakter"
-                        class="w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                    />
+                        <!-- Password -->
+                        <div class="space-y-2">
+                            <Label for="password">
+                                Password
+                            </Label>
 
-                    <p
-                        v-if="form.errors.password"
-                        class="mt-1 text-sm text-red-600"
-                    >
-                        {{ form.errors.password }}
-                    </p>
-                </div>
+                            <Input
+                                id="password"
+                                v-model="form.password"
+                                type="password"
+                                placeholder="Minimal 8 karakter"
+                                :aria-invalid="!!form.errors.password"
+                            />
 
-                <!-- Role -->
-                <div class="mb-6">
-                    <label
-                        for="role"
-                        class="mb-2 block text-sm font-semibold text-gray-700"
-                    >
-                        Role
-                    </label>
+                            <p class="text-xs text-muted-foreground">
+                                Gunakan password minimal 8 karakter.
+                            </p>
 
-                    <select
-                        id="role"
-                        v-model="form.role"
-                        class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                    >
-                        <option value="admin">
-                            Admin
-                        </option>
+                            <p
+                                v-if="form.errors.password"
+                                class="text-sm text-destructive"
+                            >
+                                {{ form.errors.password }}
+                            </p>
+                        </div>
 
-                        <option value="super_admin">
-                            Super Admin
-                        </option>
-                    </select>
+                        <!-- Role -->
+                        <div class="space-y-2">
+                            <Label for="role">
+                                Role
+                            </Label>
 
-                    <p
-                        v-if="form.errors.role"
-                        class="mt-1 text-sm text-red-600"
-                    >
-                        {{ form.errors.role }}
-                    </p>
-                </div>
+                            <Select v-model="form.role">
+                                <SelectTrigger
+                                    id="role"
+                                    class="w-full"
+                                >
+                                    <SelectValue
+                                        placeholder="Pilih role"
+                                    />
+                                </SelectTrigger>
 
-                <!-- Buttons -->
-                <div class="flex justify-end gap-3">
-                    <Link
-                        href="/users"
-                        class="rounded-lg border border-gray-300 px-5 py-2 font-semibold text-gray-700 hover:bg-gray-50"
-                    >
-                        Batal
-                    </Link>
+                                <SelectContent>
+                                    <SelectItem value="admin">
+                                        Admin
+                                    </SelectItem>
 
-                    <button
-                        type="button"
-                        @click="submit"
-                        :disabled="form.processing"
-                        class="rounded-lg bg-blue-600 px-5 py-2 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        {{
-                            form.processing
-                                ? 'Menyimpan...'
-                                : 'Simpan User'
-                        }}
-                    </button>
-                </div>
+                                    <SelectItem value="super_admin">
+                                        Super Admin
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
 
-            </div>
+                            <p
+                                v-if="form.errors.role"
+                                class="text-sm text-destructive"
+                            >
+                                {{ form.errors.role }}
+                            </p>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="flex justify-end gap-3 pt-3">
+
+                            <!-- Batal -->
+                            <Button
+                                as-child
+                                type="button"
+                                variant="outline"
+                            >
+                                <Link href="/users">
+                                    Batal
+                                </Link>
+                            </Button>
+
+                            <!-- Simpan -->
+                            <Button
+                                type="submit"
+                                :disabled="form.processing"
+                            >
+                                {{
+                                    form.processing
+                                        ? 'Menyimpan...'
+                                        : 'Simpan User'
+                                }}
+                            </Button>
+
+                        </div>
+
+                    </form>
+                </CardContent>
+            </Card>
+
         </div>
     </div>
 </template>

@@ -1,141 +1,180 @@
 <script setup lang="ts">
-import { Link, useForm } from '@inertiajs/vue3'
+import { Head, Link, useForm } from '@inertiajs/vue3';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import {
+    Table,
+    TableBody,
+    TableHeader,
+} from '@/components/ui/table';
 
 interface User {
-    id: number
-    name: string
-    email: string
-    role: string | null
+    id: number;
+    name: string;
+    email: string;
+    role: string | null;
 }
 
 interface Props {
-    users: User[]
+    users: User[];
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
+
+/*
+|--------------------------------------------------------------------------
+| Hapus User
+|--------------------------------------------------------------------------
+*/
 
 const deleteUser = (id: number) => {
     if (!confirm('Apakah Anda yakin ingin menghapus user ini?')) {
-        return
+        return;
     }
 
-    const form = useForm({})
+    const form = useForm({});
 
-    form.delete(`/users/${id}`)
-}
+    form.delete(`/users/${id}`);
+};
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-100 p-8">
-        <div class="mx-auto max-w-7xl">
+    <Head title="Manage Users" />
+
+    <div
+        class="min-h-full w-full flex-1 bg-background px-4 py-6 md:px-8 lg:px-10"
+    >
+        <div class="w-full space-y-6">
 
             <!-- Header -->
-            <div class="mb-6 flex items-center justify-between">
+            <div
+                class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
+            >
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-800">
+                    <h1 class="text-3xl font-bold tracking-tight">
                         Manage Users
                     </h1>
 
-                    <p class="mt-1 text-gray-600">
+                    <p class="mt-1 text-muted-foreground">
                         Kelola data user
                     </p>
                 </div>
 
                 <!-- Tambah User -->
-                <Link
-                    href="/users/create"
-                    class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700"
-                >
-                    + Tambah User
-                </Link>
+                <Button as-child>
+                    <Link href="/users/create">
+                        + Tambah User
+                    </Link>
+                </Button>
+            </div>
+
+            <!-- Jumlah User -->
+            <div class="text-sm text-muted-foreground">
+                Menampilkan
+                <strong>
+                    {{ props.users.length }}
+                </strong>
+                user.
             </div>
 
             <!-- Table -->
-            <div class="overflow-hidden rounded-lg bg-white shadow">
-                <table class="w-full">
+            <Card
+                class="overflow-hidden border-border/70 bg-card/95 shadow-sm"
+            >
+                <Table>
 
                     <!-- Header Table -->
-                    <thead class="bg-gray-50">
+                    <TableHeader>
                         <tr>
                             <th
-                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600"
+                                class="px-6 py-3 text-left text-sm font-semibold text-muted-foreground"
                             >
                                 No
                             </th>
 
                             <th
-                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600"
+                                class="px-6 py-3 text-left text-sm font-semibold text-muted-foreground"
                             >
                                 Nama
                             </th>
 
                             <th
-                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600"
+                                class="px-6 py-3 text-left text-sm font-semibold text-muted-foreground"
                             >
                                 Email
                             </th>
 
                             <th
-                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600"
+                                class="px-6 py-3 text-left text-sm font-semibold text-muted-foreground"
                             >
                                 Role
                             </th>
 
                             <th
-                                class="px-6 py-3 text-center text-sm font-semibold text-gray-600"
+                                class="px-6 py-3 text-center text-sm font-semibold text-muted-foreground"
                             >
                                 Aksi
                             </th>
                         </tr>
-                    </thead>
+                    </TableHeader>
 
                     <!-- Body -->
-                    <tbody class="divide-y divide-gray-200">
+                    <TableBody>
 
+                        <!-- User -->
                         <tr
                             v-for="(user, index) in props.users"
                             :key="user.id"
-                            class="hover:bg-gray-50"
+                            class="transition-colors hover:bg-muted/40"
                         >
 
                             <!-- No -->
-                            <td class="px-6 py-4 text-gray-800">
+                            <td class="px-6 py-4 text-foreground">
                                 {{ index + 1 }}
                             </td>
 
                             <!-- Nama -->
-                            <td class="px-6 py-4 font-medium text-gray-800">
+                            <td
+                                class="px-6 py-4 font-medium text-foreground"
+                            >
                                 {{ user.name }}
                             </td>
 
                             <!-- Email -->
-                            <td class="px-6 py-4 text-gray-600">
+                            <td class="px-6 py-4 text-muted-foreground">
                                 {{ user.email }}
                             </td>
 
                             <!-- Role -->
                             <td class="px-6 py-4">
 
-                                <span
+                                <!-- Super Admin -->
+                                <Badge
                                     v-if="user.role === 'super_admin'"
-                                    class="rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700"
+                                    variant="secondary"
+                                    class="bg-purple-100 text-purple-700 hover:bg-purple-100"
                                 >
                                     Super Admin
-                                </span>
+                                </Badge>
 
-                                <span
+                                <!-- Admin -->
+                                <Badge
                                     v-else-if="user.role === 'admin'"
-                                    class="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700"
+                                    variant="secondary"
+                                    class="bg-blue-100 text-blue-700 hover:bg-blue-100"
                                 >
                                     Admin
-                                </span>
+                                </Badge>
 
-                                <span
+                                <!-- Belum Ada Role -->
+                                <Badge
                                     v-else
-                                    class="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-600"
+                                    variant="secondary"
                                 >
                                     Belum ada role
-                                </span>
+                                </Badge>
 
                             </td>
 
@@ -144,39 +183,46 @@ const deleteUser = (id: number) => {
                                 <div class="flex justify-center gap-2">
 
                                     <!-- Edit -->
-                                    <Link
-                                        :href="`/users/${user.id}/edit`"
-                                        class="rounded bg-yellow-500 px-3 py-1 text-sm font-medium text-white hover:bg-yellow-600"
+                                    <Button
+                                        as-child
+                                        size="sm"
+                                        variant="outline"
                                     >
-                                        Edit
-                                    </Link>
+                                        <Link
+                                            :href="`/users/${user.id}/edit`"
+                                        >
+                                            Edit
+                                        </Link>
+                                    </Button>
 
-                                    <!-- Delete -->
-                                    <button
+                                    <!-- Hapus -->
+                                    <Button
                                         type="button"
+                                        size="sm"
+                                        variant="destructive"
                                         @click="deleteUser(user.id)"
-                                        class="rounded bg-red-600 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
                                     >
                                         Hapus
-                                    </button>
+                                    </Button>
 
                                 </div>
                             </td>
+
                         </tr>
 
-                        <!-- Tidak ada user -->
+                        <!-- Tidak Ada User -->
                         <tr v-if="props.users.length === 0">
                             <td
                                 colspan="5"
-                                class="px-6 py-10 text-center text-gray-500"
+                                class="px-6 py-10 text-center text-muted-foreground"
                             >
                                 Belum ada user.
                             </td>
                         </tr>
 
-                    </tbody>
-                </table>
-            </div>
+                    </TableBody>
+                </Table>
+            </Card>
 
         </div>
     </div>
